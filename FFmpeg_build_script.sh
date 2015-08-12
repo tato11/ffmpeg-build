@@ -1,5 +1,5 @@
 #!/bin/sh
-#Autor:   Eduardo Rosales
+#Autor:   Eduardo Rosales (https://github.com/tato11)
 #Date:    11-nov-2014
 #Version: 0.1
 
