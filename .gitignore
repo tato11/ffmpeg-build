@@ -1,2 +1,4 @@
 /builds
-/releases/v*/builds
+/**/builds
+/ffmpeg-build_build
+/ffmpeg-build_build/**
