@@ -1,4 +1,4 @@
-```bash
+```
 Help:
   -h, --help               print this message
 
