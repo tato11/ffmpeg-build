@@ -1346,6 +1346,9 @@ EOF
 
     #Install libtool ##
     sudo apt-get -y install libtool || exit 1
+    if ! (libtool --version) < /dev/null > /dev/null 2>&1; then
+        sudo apt-get -y install libtool-bin || exit 1
+    fi
 
     #Install Video Acceleration API
     sudo apt-get -y install libva-dev || exit 1
