@@ -1048,7 +1048,7 @@ EOF
     #Opus
     if [ ! -d opus ]; then
         #Get the code from source
-        git clone git://git.xiph.org/opus.git opus || exit 1
+        git clone https://git.xiph.org/opus.git opus || exit 1
         if [ ! -d opus ]; then
             echo "Error: Couldn't get 'opus' source code."
             exit 1
@@ -1162,7 +1162,7 @@ EOF
     #Flac
     if [ ! -d flac ]; then
         #Get the code from source
-        git clone git://git.xiph.org/flac.git flac || exit 1
+        git clone https://git.xiph.org/flac.git flac || exit 1
         if [ ! -d flac ]; then
             echo "Error: Couldn't get 'flac' source code."
             exit 1
