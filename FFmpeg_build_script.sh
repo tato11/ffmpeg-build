@@ -1,7 +1,6 @@
-#!/bin/sh
-#Autor:   Eduardo Rosales (https://github.com/tato11)
-#Date:    11-nov-2014
-#Version: 0.1
+#!/bin/bash
+#Autor: Eduardo Rosales (https://github.com/tato11)
+#Version: 0.2
 
 #======================================
 #Get and set config variables
@@ -78,14 +77,14 @@ IS_HYBRID=0
 SOURCE_CODE_EXISTS=0
 YES_TO_ALL=0
 
-root_when_needed() {
+function root_when_needed() {
     if [ ! -w "$1" ]; then
         echo "sudo "
     fi
 }
 
 #Super user validation
-validate_superuser() {
+function validate_superuser() {
     #Validate that the script is executed as root
     if [ "$(id -u)" != "0" ]; then
         echo "You need superuser rights to execute this action."
@@ -94,7 +93,7 @@ validate_superuser() {
 }
 
 #Write access validation
-validate_write_access() {
+function validate_write_access() {
     if [ ! -w "$1" ]; then
         echo "You need write access on '$1' directory to execute this action."
         exit 1;
@@ -102,7 +101,7 @@ validate_write_access() {
 }
 
 #Write access validation
-validate_superuser_write_access() {
+function validate_superuser_write_access() {
     if ! sudo test -w "$1"; then
         echo "You need write access on '$1' directory to execute this action."
         exit 1;
@@ -110,7 +109,7 @@ validate_superuser_write_access() {
 }
 
 #Display a confirmation message
-confirm () {
+function confirm () {
     #Call with a prompt string or use a default
     if [ $YES_TO_ALL -eq 1 ]; then
         echo "${1:-Are you sure? (y/n)} Y"
@@ -128,7 +127,7 @@ confirm () {
     esac
 }
 
-get_real_path() {
+function get_real_path() {
     AUX="$(cd "$(dirname "$0")"; pwd -P)"
     if [ $# -gt 1 ]; then
         if [ ! -d "$2" ]; then
@@ -143,7 +142,7 @@ get_real_path() {
 }
 
 #Show help message
-show_help() {
+function show_help() {
 cat <<EOF
 
 Description:
@@ -288,6 +287,7 @@ Package Options:
   --maintainer=EMAIL       set a custom maintainer on package builds
                            [USER@HOST]
 
+
 Current libraries to build and install from source code:
 
   =================  ==============  ============================
@@ -300,7 +300,7 @@ Current libraries to build and install from source code:
    ** SoX             soxr-code       libsox-build
    Vorbis             vorbis          libvorbis-build
    Theora             theora          libtheora-build
-   VisualOn AAC       vo-aacenc       libvo-aacenc-build
+   *** VisualOn AAC   vo-aacenc       libvo-aacenc-build
    VisualOn AMR-WB    vo-amrwbenc     libvo-amrwbenc-build
    Flac               flac            libflac-build
    libsndfile         libsndfile      libsndfile-build
@@ -310,9 +310,19 @@ Current libraries to build and install from source code:
    XAVS               xavs            libxavs-build
    FFmpeg             ffmpeg          ffmpeg-build
   =================  ==============  ============================
-   
+
   * Not implemented
  ** Shared or hybrid build required
+
+
+Some libraries were removed since FFmpeg doesn't support those libraries
+anymore:
+
+  =================  ==============  ============================
+   Library            Code Folder     Package Name
+  =================  ==============  ============================
+   VisualOn AAC       vo-aacenc       libvo-aacenc-build
+  =================  ==============  ============================
 
 EOF
     exit 0
@@ -714,7 +724,7 @@ esac
 #ACTION: clean
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 if [ $IS_CLEAN -eq 1 ]; then
-#    remove_debs() {
+#    function remove_debs() {
 #        #Delete deb files from the directory
 #        if [ -d "$1" ]; then
 #            validate_write_access "$1"
@@ -730,7 +740,7 @@ if [ $IS_CLEAN -eq 1 ]; then
 #    }
     
 #    #Delete every deb file on source code
-#    clean_debs() {
+#    function clean_debs() {
 #        #Delete FFmpeg debs
 #        remove_debs "ffmpeg"
 #    }
@@ -747,7 +757,7 @@ fi
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #ACTION: remove
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-remove_builds() {
+function remove_builds() {
     if [ $IS_PACKAGE_INSTALL -eq 1 ]; then
         #Remove ffmpeg-build
         sudo apt-get -y purge ffmpeg-build
@@ -1048,7 +1058,7 @@ EOF
     #Opus
     if [ ! -d opus ]; then
         #Get the code from source
-        git clone https://git.xiph.org/opus.git opus || exit 1
+        git clone git://git.xiph.org/opus.git opus || exit 1
         if [ ! -d opus ]; then
             echo "Error: Couldn't get 'opus' source code."
             exit 1
@@ -1125,22 +1135,22 @@ EOF
         cd ..
     fi
 
-    #VisualOn AAC
-    if [ ! -d vo-aacenc ]; then
-        #Get the code from source
-        git clone git://github.com/mstorsjo/vo-aacenc.git vo-aacenc || exit 1
-        if [ ! -d vo-aacenc ]; then
-            echo "Error: Couldn't get 'vo-aacenc' source code."
-            exit 1
-        fi
-    elif [ $SOURCE_CODE_EXISTS -eq 0 ] || [ $IS_DOWNLOAD_ONLY -eq 1 ]; then
-        #Clean and update existing code
-        cd vo-aacenc
-        make distclean
-        git pull || exit 1
-        git mergetool #|| exit 1
-        cd ..
-    fi
+    ##VisualOn AAC
+    #if [ ! -d vo-aacenc ]; then
+    #    #Get the code from source
+    #    git clone git://github.com/mstorsjo/vo-aacenc.git vo-aacenc || exit 1
+    #    if [ ! -d vo-aacenc ]; then
+    #        echo "Error: Couldn't get 'vo-aacenc' source code."
+    #        exit 1
+    #    fi
+    #elif [ $SOURCE_CODE_EXISTS -eq 0 ] || [ $IS_DOWNLOAD_ONLY -eq 1 ]; then
+    #    #Clean and update existing code
+    #    cd vo-aacenc
+    #    make distclean
+    #    git pull || exit 1
+    #    git mergetool #|| exit 1
+    #    cd ..
+    #fi
 
     #VisualOn AMR-WB
     if [ ! -d vo-amrwbenc ]; then
@@ -1162,7 +1172,7 @@ EOF
     #Flac
     if [ ! -d flac ]; then
         #Get the code from source
-        git clone https://git.xiph.org/flac.git flac || exit 1
+        git clone git://git.xiph.org/flac.git flac || exit 1
         if [ ! -d flac ]; then
             echo "Error: Couldn't get 'flac' source code."
             exit 1
@@ -1346,9 +1356,6 @@ EOF
 
     #Install libtool ##
     sudo apt-get -y install libtool || exit 1
-    if ! (libtool --version) < /dev/null > /dev/null 2>&1; then
-        sudo apt-get -y install libtool-bin || exit 1
-    fi
 
     #Install Video Acceleration API
     sudo apt-get -y install libva-dev || exit 1
@@ -1530,15 +1537,15 @@ EOF
     make distclean
     cd ..
 
-    #Install VisualOn AAC
-    #sudo apt-get -y install libvo-aacenc-dev
-    cd vo-aacenc
-    autoreconf -fiv || exit 1
-    ./configure --enable-static=$STATIC_YES_NO --enable-shared=$SHARED_YES_NO --prefix="$LIB_PREFIX" || exit 1
-    make || exit 1
-    $(root_when_needed "$LIB_PREFIX") make install || exit 1
-    make distclean
-    cd ..
+    ##Install VisualOn AAC
+    ##sudo apt-get -y install libvo-aacenc-dev
+    #cd vo-aacenc
+    #autoreconf -fiv || exit 1
+    #./configure --enable-static=$STATIC_YES_NO --enable-shared=$SHARED_YES_NO --prefix="$LIB_PREFIX" || exit 1
+    #make || exit 1
+    #$(root_when_needed "$LIB_PREFIX") make install || exit 1
+    #make distclean
+    #cd ..
 
     #Install VisualOn AMR-WB
     #sudo apt-get -y install libvo-amrwbenc-dev
@@ -1659,7 +1666,6 @@ EOF
         --enable-libspeex \
         --enable-libtheora \
         --enable-libtwolame \
-        --enable-libvo-aacenc \
         --enable-libvo-amrwbenc \
         --enable-libvorbis \
         --enable-libvpx \

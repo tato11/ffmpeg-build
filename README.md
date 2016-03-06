@@ -127,6 +127,7 @@ Package Options:
   --maintainer=EMAIL       set a custom maintainer on package builds
                            [USER@HOST]
 
+
 Current libraries to build and install from source code:
 
   =================  ==============  ============================
@@ -139,7 +140,7 @@ Current libraries to build and install from source code:
    ** SoX             soxr-code       libsox-build
    Vorbis             vorbis          libvorbis-build
    Theora             theora          libtheora-build
-   VisualOn AAC       vo-aacenc       libvo-aacenc-build
+   *** VisualOn AAC   vo-aacenc       libvo-aacenc-build
    VisualOn AMR-WB    vo-amrwbenc     libvo-amrwbenc-build
    Flac               flac            libflac-build
    libsndfile         libsndfile      libsndfile-build
@@ -152,4 +153,14 @@ Current libraries to build and install from source code:
 
   * Not implemented
  ** Shared or hybrid build required
+
+
+Some libraries were removed since FFmpeg doesn't support those libraries
+anymore:
+
+  =================  ==============  ============================
+   Library            Code Folder     Package Name
+  =================  ==============  ============================
+   VisualOn AAC       vo-aacenc       libvo-aacenc-build
+  =================  ==============  ============================
 ```
