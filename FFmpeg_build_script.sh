@@ -20,7 +20,6 @@ MAINTAINER="$(id -u -n)@$(hostname -f)"
 #PACKAGE_PROVIDES="ffmpeg-build,ffmpeg-build-server,ffmpeg-build-play,ffmpeg-build-probe"
 
 #Paths
-#PREFIX="/usr/local"
 BUILD_FOLDER="ffmpeg-build_build"
 BUILD_DIR="$SCRIPT_DIR/$BUILD_FOLDER"
 LIB_FOLDER="codecs"
@@ -50,12 +49,9 @@ STATIC_YES_NO=""
 STATIC_ENABLED=""
 STATIC_DISABLED=""
 EXISTING_SOURCE_CODE="no"
-#NEW_PREFIX=""
-NEW_DEB_PREFIX=""
-NEW_LIB_PREFIX=""
-NEW_BIN_PREFIX=""
+#NEW_LIB_PREFIX=""
 NEW_ACTION=""
-NEW_SOURCE_DIR=""
+#NEW_SOURCE_DIR=""
 NEW_ENABLE_SHARED=""
 NEW_ENABLE_STATIC=""
 NEW_HYBRID_BUILD=""
@@ -141,6 +137,22 @@ function get_real_path() {
     cd $AUX
 }
 
+#Show packages to be installed
+function show_packages_to_install() {
+  # Remove package dependencies from here once are compiled from source code
+cat <<EOF
+    subversion, git, autoconf, automake, autogen, cmake, build-essential,
+    checkinstall, debhelper, dh-make, libgpac-dev, libjack-jackd2-dev,
+    libsdl1.2-dev, libtool, libva-dev, libvdpau-dev, libx11-dev,
+    libxext-dev, libxfixes-dev, pkg-config, texi2html, gperf, yasm, bzip2,
+    fontconfig, libgnutls-dev, libass-dev, libbluray-dev, libcaca-dev,
+    libfreetype6-dev, libgsm1-dev, libfaac-dev, libmp3lame-dev,
+    libopencore-amrnb-dev, libopencore-amrwb-dev, libopenjpeg-dev,
+    librtmp-dev, libschroedinger-dev, libspeex-dev, libtwolame-dev,
+    libxvidcore-dev, zlib1g-dev
+EOF
+}
+
 #Show help message
 function show_help() {
 cat <<EOF
@@ -151,9 +163,29 @@ Description:
   branch). It can also delete the downloaded source code and generated deb
   files by using the 'clean' action.
   
-  ffmpeg-build package is a FFmpeg wrapper that installs on 'opt' directory
-  isolating it from system package ecosystem so there are no broken
-  packages in any way.
+  ffmpeg-build package is a FFmpeg wrapper that installs on
+  '/opt/ffmpeg-build' directory isolating it from system package ecosystem
+  so there are no broken packages in any way.
+
+  It will need to install the following packages in order to execute:
+
+EOF
+
+  show_packages_to_install
+
+cat <<EOF
+
+  It will also create 'ffmpeg-build_build' directory on the same directory
+  this script is located to store all the files it generates as well as the
+  source code it downloads:
+    'ffmpeg-build_build/codecs'      stores codec libraries and binaries
+    'ffmpeg-build_build/ffmpeg'      stores FFmpeg libraries and binaries
+    'ffmpeg-build_build/package'     stores all related to the package
+                                     generation process including the
+                                     package itself
+    'ffmpeg-build_build/source-code' stores any codec source code downloaded
+                                     from each repository as well as any
+                                     other downloaded source code
 
 Usage:
 EOF
@@ -173,22 +205,17 @@ Standar Options:
       remove               remove (purge) installed ffmpeg-build and delete
                            build folder. It doesn't removes ffmpeg-build
                            package when '--build-package' value is 'no'
-      clean                delete source code folder.
+      clean                delete source code folder
       download-only        download all the source code to be used without
                            compile it nor build it
   --source-code-dir=DIR    directory to store the downloaded source code
                            [source-code]
-  --build-package=yes|no   build ffmpeg-build package. [yes]
+  --build-package=yes|no   build ffmpeg-build package [yes]
   --package-install=yes|no install ffmpeg-build after the package is build.
                            Ignored when ffmpeg-build package isn't build
                            [yes]
-  --prefix=PREFIX          install architecture-independent files in PREFIX
-                           (FFmpeg only) [/usr/local]
-  --lib-prefix=LIB_PREFIX  libraries instalation build folder (excluding
-                           FFmpeg) [/usr/local/ffmpeg_build_libraries]
-  --bin-prefix=BIN_PREFIX  binaries instalation build folder (including
-                           FFmpeg) when doing a non package install
-                           (NOT IMPLEMENTED YET) [ffmpeg_build_binaries]
+  --maintainer=MAINTAINER  specifies who is the maintainer of the created
+                           package [user@host]
   -y, --yes                respond yes to all questions
                       
 Configuration Options:
@@ -353,34 +380,34 @@ while test $# -gt 0; do
             fi
             shift
             ;;
-        --source-code-dir*)
-            "AUX"=`echo "$1" | sed -e 's/^[^=]*=//g'`
-            if [ "$AUX" != "--source-code-dir" ]; then
-                NEW_SOURCE_DIR=$AUX
-            fi
-            shift
-            ;;
-        --prefix*)
-            AUX=`echo $1 | sed -e 's/^[^=]*=//g'`
-            if [ "$AUX" != "--prefix" ]; then
-                NEW_PREFIX=$AUX
-            fi
-            shift
-            ;;
-        --lib-prefix*)
-            AUX=`echo $1 | sed -e 's/^[^=]*=//g'`
-            if [ "$AUX" != "--lib-prefix" ]; then
-                NEW_LIB_PREFIX=$AUX
-            fi
-            shift
-            ;;
-        --bin-prefix*)
-            AUX=`echo $1 | sed -e 's/^[^=]*=//g'`
-            if [ "$AUX" != "--bin-prefix" ]; then
-                NEW_BIN_PREFIX=$AUX
-            fi
-            shift
-            ;;
+        #--source-code-dir*)
+        #    "AUX"=`echo "$1" | sed -e 's/^[^=]*=//g'`
+        #    if [ "$AUX" != "--source-code-dir" ]; then
+        #        NEW_SOURCE_DIR=$AUX
+        #    fi
+        #    shift
+        #    ;;
+        #--prefix*)
+        #    AUX=`echo $1 | sed -e 's/^[^=]*=//g'`
+        #    if [ "$AUX" != "--prefix" ]; then
+        #        NEW_PREFIX=$AUX
+        #    fi
+        #    shift
+        #    ;;
+        #--lib-prefix*)
+        #    AUX=`echo $1 | sed -e 's/^[^=]*=//g'`
+        #    if [ "$AUX" != "--lib-prefix" ]; then
+        #        NEW_LIB_PREFIX=$AUX
+        #    fi
+        #    shift
+        #    ;;
+        #--bin-prefix*)
+        #    AUX=`echo $1 | sed -e 's/^[^=]*=//g'`
+        #    if [ "$AUX" != "--bin-prefix" ]; then
+        #        NEW_BIN_PREFIX=$AUX
+        #    fi
+        #    shift
+        #    ;;
         --enable-static*)
             AUX=`echo $1 | sed -e 's/^[^=]*=//g'`
             if [ "$AUX" = "--enable-static" ]; then
@@ -459,22 +486,6 @@ while test $# -gt 0; do
             ;;
     esac
 done
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-#Keep sudo alive
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cat <<EOF
-
-IMPORTANT
-=========
-  This script require root access to install FFmpeg dependencies from
-  repositories and will require you to login if sudo timeout.
-
-EOF
-#Ask for sudo admin rights only once to install required packages
-sudo -v
-#Keep-alive: update existing sudo time stamp if set, otherwise do nothing.
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 #Validate configuration
 #MODE
@@ -574,11 +585,11 @@ case $MODE in
         ;;
 esac
 #Assign custom values
-if [ "$NEW_DEB_PREFIX" != "" ]; then DEB_PREFIX=$NEW_DEB_PREFIX; fi
-if [ "$NEW_LIB_PREFIX" != "" ]; then LIB_PREFIX=$NEW_LIB_PREFIX; fi
-if [ "$NEW_BIN_PREFIX" != "" ]; then BIN_PREFIX=$NEW_BIN_PREFIX; fi
+#if [ "$NEW_DEB_PREFIX" != "" ]; then DEB_PREFIX=$NEW_DEB_PREFIX; fi
+#if [ "$NEW_LIB_PREFIX" != "" ]; then LIB_PREFIX=$NEW_LIB_PREFIX; fi
+#if [ "$NEW_BIN_PREFIX" != "" ]; then BIN_PREFIX=$NEW_BIN_PREFIX; fi
 if [ "$NEW_ACTION" != "" ]; then ACTION=$NEW_ACTION; fi
-if [ "$NEW_SOURCE_DIR" != "" ]; then SOURCE_DIR=$NEW_SOURCE_DIR; fi
+#if [ "$NEW_SOURCE_DIR" != "" ]; then SOURCE_DIR=$NEW_SOURCE_DIR; fi
 if [ "$NEW_ENABLE_SHARED" != "" ]; then ENABLE_SHARED=$NEW_ENABLE_SHARED; fi
 if [ "$NEW_ENABLE_STATIC" != "" ]; then ENABLE_STATIC=$NEW_ENABLE_STATIC; fi
 if [ "$NEW_HYBRID_BUILD" != "" ]; then HYBRID_BUILD=$NEW_HYBRID_BUILD; fi
@@ -719,6 +730,30 @@ case $EXISTING_SOURCE_CODE in
         exit 1
         ;;
 esac
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#Keep sudo alive
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cat <<EOF
+
+IMPORTANT
+=========
+  This script requires root access to install FFmpeg dependencies from
+  repositories and will require you to login if sudo timeout.
+
+  The following packages will be installed:
+
+EOF
+show_packages_to_install
+echo ""
+! confirm "  Do you want to continue? (y/n) " && exit 0
+
+#Ask for sudo admin rights only once to install required packages
+sudo -v
+#Keep-alive: update existing sudo time stamp if set, otherwise do nothing.
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #ACTION: clean
