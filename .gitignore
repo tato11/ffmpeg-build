@@ -2,3 +2,5 @@
 /**/builds
 /ffmpeg-build_build
 /ffmpeg-build_build/**
+/nbproject
+/nbproject/**
